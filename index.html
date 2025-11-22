@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Business Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #000000, #222222, #000000);
+            background-size: 400% 400%;
+            animation: wave 15s ease infinite;
+            color: #ffffff;
+            overflow-x: hidden;
+            user-select: none;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-weight: 300;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        @keyframes wave {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .navbar {
+            background: #000000;
+            padding: 15px 30px;
+            border-bottom: 1px solid #ffffff;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar .nav-links {
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+        }
+        .navbar a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            background: #333333;
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: 1px solid #ffffff;
+        }
+        .navbar a:hover {
+            color: #000000;
+            background: #cccccc;
+            border-color: #cccccc;
+        }
+        .hero {
+            text-align: center;
+            padding: 120px 30px 80px;
+            background: #000000;
+        }
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px #ffffff;
+            letter-spacing: 2px;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            padding: 80px 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .panel {
+            background: linear-gradient(45deg, #111111, #333333, #111111);
+            background-size: 400% 400%;
+            animation: wave 15s ease infinite;
+            border: 1px solid #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px #000000;
+            transition: all 0.3s ease;
+        }
+        .panel:hover {
+            border-color: #cccccc;
+            box-shadow: 0 30px 60px #333333;
+        }
+        .panel h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 0 0 15px #ffffff;
+        }
+        .code-window {
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .code-header {
+            background: #1A1A1A;
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .code-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .code-dot.red { background: #ff5f57; }
+        .code-dot.yellow { background: #ffbd2e; }
+        .code-dot.green { background: #28ca42; }
+        .code-content {
+            padding: 15px;
+            color: #ffffff;
+        }
+        .performance-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 0, 0.5));
+        }
+        .performance-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .perf-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .perf-card:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+        }
+        .perf-card h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+        .perf-card p {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        .floating-coins {
+            position: absolute;
+            pointer-events: none;
+            font-size: 18px;
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+            animation: float 1s ease-out forwards;
+            z-index: 10;
+        }
+        @keyframes float {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-100px); }
+        }
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-links">
+            <a href="index.html">Главная</a>
+            <a href="shop.html">Магазин</a>
+            <a href="achievements.html">Достижения</a>
+            <a href="stats.html">Статистика</a>
+            <a href="daily.html">Ежедневно</a>
+            <a href="#" onclick="logout()">Выход</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Meme Business Simulator</h1>
+        <p>Build your empire with memes and profits. Click, invest, and watch your wealth grow exponentially.</p>
+    </section>
+
+    <section class="main-content">
+        <div class="panel">
+            <h2>External Execution</h2>
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="code-dot red"></div>
+                    <div class="code-dot yellow"></div>
+                    <div class="code-dot green"></div>
+                    <span style="color: #888; margin-left: 10px;">business.js</span>
+                </div>
+                <div class="code-content">
+                    <span style="color: #569cd6;">const</span> <span style="color: #9cdcfe;">business</span> = <span style="color: #569cd6;">new</span> <span style="color: #4ec9b0;">MemeEmpire</span>();</br>
+                    <span style="color: #9cdcfe;">business</span>.<span style="color: #dcdcaa;">invest</span>(<span style="color: #b5cea8;">1000</span>);</br>
+                    <span style="color: #9cdcfe;">business</span>.<span style="color: #dcdcaa;">generateIncome</span>();</br>
+                    <span style="color: #c586c0;">console</span>.<span style="color: #dcdcaa;">log</span>(<span style="color: #ce9178;">'Profit: '</span> + <span style="color: #9cdcfe;">business</span>.<span style="color: #9cdcfe;">profit</span>);
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Lightning Fast Performance</h2>
+            <div class="performance-icon">⚡</div>
+            <div class="performance-cards">
+                <div class="perf-card">
+                    <h3 id="coin-count">0</h3>
+                    <p>Coins</p>
+                </div>
+                <div class="perf-card">
+                    <h3 id="income-per-sec">0</h3>
+                    <p>Income/sec</p>
+                </div>
+                <div class="perf-card">
+                    <h3 id="total-earned">0</h3>
+                    <p>Total Earned</p>
+                </div>
+                <div class="perf-card clicker" id="clicker" style="cursor: pointer; font-size: 2rem;">💰 Click!</div>
+            </div>
+            <div id="prestige-section" style="display: none; margin-top: 20px;">
+                <button id="prestige-btn" style="padding: 10px 20px; background: #ffffff; color: #000000; border: none; border-radius: 5px; cursor: pointer;">Престиж! (+1 очко престижа)</button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const businessItems = [
+            { id: 'lemonade', name: 'Лимонадный Стенд', basePrice: 10, baseIncome: 1, description: 'Классика! 🍋' },
+            { id: 'newspaper', name: 'Газетный Бизнес', basePrice: 100, baseIncome: 10, description: 'Новости - это золото! 📰' },
+            { id: 'carwash', name: 'Автомойка', basePrice: 1000, baseIncome: 100, description: 'Чистота - залог успеха! 🚗' },
+            { id: 'pizza', name: 'Пиццерия', basePrice: 10000, baseIncome: 1000, description: 'Всем нравится пицца! 🍕' },
+            { id: 'bank', name: 'Банк', basePrice: 100000, baseIncome: 10000, description: 'Деньги любят деньги! 🏦' },
+            { id: 'factory', name: 'Фабрика', basePrice: 1000000, baseIncome: 100000, description: 'Производство на максимум! 🏭' },
+            { id: 'oilrig', name: 'Нефтяная Вышка', basePrice: 10000000, baseIncome: 1000000, description: 'Черное золото! 🛢️' },
+            { id: 'spaceship', name: 'Космический Корабль', basePrice: 100000000, baseIncome: 10000000, description: 'К звездам! 🚀' },
+            { id: 'alien', name: 'Инопланетная Колонизация', basePrice: 1000000000, baseIncome: 100000000, description: 'Внеземные богатства! 👽' },
+            { id: 'blackhole', name: 'Черная Дыра', basePrice: 10000000000, baseIncome: 1000000000, description: 'Бесконечная энергия! 🕳️' },
+        ];
+
+        const currentUser = localStorage.getItem('currentUser');
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        let coins = parseFloat(localStorage.getItem(`${currentUser}_coins`)) || 0;
+        let coinsPerClick = parseFloat(localStorage.getItem(`${currentUser}_coinsPerClick`)) || 1;
+        let incomePerSec = parseFloat(localStorage.getItem(`${currentUser}_incomePerSec`)) || 0;
+        let totalEarned = parseFloat(localStorage.getItem(`${currentUser}_totalEarned`)) || 0;
+        let businesses = JSON.parse(localStorage.getItem(`${currentUser}_businesses`)) || {};
+        let upgrades = JSON.parse(localStorage.getItem(`${currentUser}_upgrades`)) || {};
+        let totalClicks = parseInt(localStorage.getItem(`${currentUser}_totalClicks`)) || 0;
+        let autoClickerClicksPerSec = parseInt(localStorage.getItem(`${currentUser}_autoClickerClicksPerSec`)) || 0;
+        let prestigePoints = parseInt(localStorage.getItem(`${currentUser}_prestigePoints`)) || 0;
+        let prestigeMultiplier = 1 + prestigePoints * 0.1;
+
+        // Offline progress
+        const lastSaveTime = parseInt(localStorage.getItem(`${currentUser}_lastSaveTime`)) || Date.now();
+        const now = Date.now();
+        const offlineTime = (now - lastSaveTime) / 1000; // seconds
+        if (offlineTime > 60) { // more than 1 minute
+            const offlineIncome = incomePerSec * offlineTime;
+            coins += offlineIncome;
+            totalEarned += offlineIncome;
+            alert(`Вы были оффлайн ${Math.floor(offlineTime / 60)} минут и заработали ${Math.floor(offlineIncome)} монет!`);
+        }
+        localStorage.setItem(`${currentUser}_lastSaveTime`, now);
+
+        // Recalculate income with prestige and managers
+        incomePerSec = 0;
+        for (const [id, count] of Object.entries(businesses)) {
+            const item = businessItems.find(b => b.id === id);
+            if (item) {
+                let multiplier = prestigeMultiplier;
+                if (upgrades[id + 'Manager']) multiplier *= 2;
+                incomePerSec += item.baseIncome * count * multiplier;
+            }
+        }
+
+        const coinCount = document.getElementById('coin-count');
+        const incomePerSecEl = document.getElementById('income-per-sec');
+        const totalEarnedEl = document.getElementById('total-earned');
+        const clicker = document.getElementById('clicker');
+
+        function updateDisplay() {
+            coinCount.textContent = Math.floor(coins);
+            incomePerSecEl.textContent = incomePerSec.toFixed(1);
+            totalEarnedEl.textContent = Math.floor(totalEarned);
+        }
+
+        function saveGame() {
+            localStorage.setItem(`${currentUser}_coins`, coins);
+            localStorage.setItem(`${currentUser}_coinsPerClick`, coinsPerClick);
+            localStorage.setItem(`${currentUser}_incomePerSec`, incomePerSec);
+            localStorage.setItem(`${currentUser}_totalEarned`, totalEarned);
+            localStorage.setItem(`${currentUser}_businesses`, JSON.stringify(businesses));
+            localStorage.setItem(`${currentUser}_upgrades`, JSON.stringify(upgrades));
+        }
+
+        function startAutoClicker() {
+            setInterval(() => {
+                for (let i = 0; i < autoClickerClicksPerSec; i++) {
+                    coins += coinsPerClick;
+                    totalEarned += coinsPerClick;
+                }
+                updateDisplay();
+                saveGame();
+            }, 1000);
+        }
+
+        function generateIncome() {
+            coins += incomePerSec;
+            totalEarned += incomePerSec;
+            updateDisplay();
+            saveGame();
+        }
+
+        setInterval(generateIncome, 1000);
+
+        clicker.addEventListener('click', (e) => {
+            coins += coinsPerClick;
+            totalEarned += coinsPerClick;
+            updateDisplay();
+            saveGame();
+
+            // Floating coin effect
+            const floatingCoin = document.createElement('div');
+            floatingCoin.className = 'floating-coins';
+            floatingCoin.textContent = '+' + Math.floor(coinsPerClick);
+            floatingCoin.style.left = e.clientX + 'px';
+            floatingCoin.style.top = e.clientY + 'px';
+            document.body.appendChild(floatingCoin);
+
+            setTimeout(() => floatingCoin.remove(), 1000);
+        });
+
+        if (autoClickerClicksPerSec > 0) {
+            startAutoClicker();
+        }
+
+        function checkPrestige() {
+            const prestigeSection = document.getElementById('prestige-section');
+            if (totalEarned >= 1000000) {
+                prestigeSection.style.display = 'block';
+            } else {
+                prestigeSection.style.display = 'none';
+            }
+        }
+
+        document.getElementById('prestige-btn').addEventListener('click', () => {
+            if (confirm('Престиж сбросит ваши монеты и бизнесы, но даст +1 очко престижа и множитель дохода. Продолжить?')) {
+                prestigePoints += 1;
+                localStorage.setItem(`${currentUser}_prestigePoints`, prestigePoints);
+                // Reset progress
+                coins = 0;
+                businesses = {};
+                incomePerSec = 0;
+                totalEarned = 0; // or keep? but typically reset
+                localStorage.setItem(`${currentUser}_coins`, coins);
+                localStorage.setItem(`${currentUser}_businesses`, JSON.stringify(businesses));
+                localStorage.setItem(`${currentUser}_incomePerSec`, incomePerSec);
+                localStorage.setItem(`${currentUser}_totalEarned`, totalEarned);
+                updateDisplay();
+                checkPrestige();
+                alert('Престиж завершен! Множитель дохода увеличен.');
+            }
+        });
+
+        updateDisplay();
+        checkPrestige();
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
