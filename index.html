@@ -247,6 +247,8 @@
         let incomePerSec = parseFloat(localStorage.getItem(`${currentUser}_incomePerSec`)) || 0;
         let totalEarned = parseFloat(localStorage.getItem(`${currentUser}_totalEarned`)) || 0;
         let businesses = JSON.parse(localStorage.getItem(`${currentUser}_businesses`)) || {};
+        let lastClickTime = 0;
+        let totalClicks = parseInt(localStorage.getItem(`${currentUser}_totalClicks`)) || 0;
 
         const coinCount = document.getElementById('coin-count');
         const incomePerSecEl = document.getElementById('income-per-sec');
@@ -277,6 +279,13 @@
         setInterval(generateIncome, 1000);
 
         clicker.addEventListener('click', (e) => {
+            const now = Date.now();
+            if (now - lastClickTime < 50) {
+                alert('Auto-clicker detected! Please click manually.');
+                return;
+            }
+            lastClickTime = now;
+
             coins += coinsPerClick;
             totalEarned += coinsPerClick;
             updateDisplay();
