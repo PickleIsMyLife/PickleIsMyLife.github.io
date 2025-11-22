@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Meme Business Simulator</title>
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #000000 0%, #0A0A0A 100%);
+            color: #ffffff;
+            padding: 20px;
+            margin: 0;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            width: 350px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2rem;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        .toggle {
+            margin-top: 20px;
+            cursor: pointer;
+            color: #ff00ff;
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+        .toggle:hover {
+            color: #ffffff;
+        }
+        .error {
+            color: #ff6666;
+            margin-top: 10px;
+            text-shadow: 0 0 5px #ff6666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="form-title">Вход</h1>
+        <div id="login-form">
+            <div class="form-group">
+                <input type="text" id="login-username" placeholder="Имя пользователя">
+            </div>
+            <div class="form-group">
+                <input type="password" id="login-password" placeholder="Пароль">
+            </div>
+            <button onclick="login()">Войти</button>
+            <div class="toggle" onclick="showRegister()">Регистрация</div>
+        </div>
+        <div id="register-form" style="display: none;">
+            <div class="form-group">
+                <input type="text" id="register-username" placeholder="Имя пользователя">
+            </div>
+            <div class="form-group">
+                <input type="password" id="register-password" placeholder="Пароль">
+            </div>
+            <button onclick="register()">Зарегистрироваться</button>
+            <div class="toggle" onclick="showLogin()">Вход</div>
+        </div>
+        <div id="error-message" class="error"></div>
+    </div>
+
+    <script>
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+        }
+
+        function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+            if (users[username] && users[username].password === password) {
+                localStorage.setItem('currentUser', username);
+                window.location.href = 'index.html';
+            } else {
+                showError('Неверное имя пользователя или пароль');
+            }
+        }
+
+        function register() {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+            if (username && password) {
+                if (users[username]) {
+                    showError('Пользователь уже существует');
+                } else {
+                    users[username] = { password: password, data: {} };
+                    localStorage.setItem('users', JSON.stringify(users));
+                    localStorage.setItem('currentUser', username);
+                    window.location.href = 'index.html';
+                }
+            } else {
+                showError('Заполните все поля');
+            }
+        }
+
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('form-title').textContent = 'Регистрация';
+        }
+
+        function showLogin() {
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('form-title').textContent = 'Вход';
+        }
+
+        // Check if already logged in
+        if (localStorage.getItem('currentUser')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
