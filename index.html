@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Business Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #000000 0%, #0A0A0A 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            user-select: none;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar .nav-links {
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+        }
+        .navbar a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .navbar a:hover {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+        .hero {
+            text-align: center;
+            padding: 120px 30px 80px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(10, 10, 10, 0.9) 100%);
+        }
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            letter-spacing: 2px;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            padding: 80px 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .panel {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .panel:hover {
+            border-color: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 30px 60px rgba(0, 255, 255, 0.1);
+        }
+        .panel h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #00ffff;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        .code-window {
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .code-header {
+            background: #1A1A1A;
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .code-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .code-dot.red { background: #ff5f57; }
+        .code-dot.yellow { background: #ffbd2e; }
+        .code-dot.green { background: #28ca42; }
+        .code-content {
+            padding: 15px;
+            color: #ffffff;
+        }
+        .performance-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 0, 0.5));
+        }
+        .performance-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .perf-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .perf-card:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+        }
+        .perf-card h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+        .perf-card p {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        .floating-coins {
+            position: absolute;
+            pointer-events: none;
+            font-size: 18px;
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+            animation: float 1s ease-out forwards;
+            z-index: 10;
+        }
+        @keyframes float {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-100px); }
+        }
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-links">
+            <a href="index.html">Главная</a>
+            <a href="shop.html">Магазин</a>
+            <a href="achievements.html">Достижения</a>
+            <a href="stats.html">Статистика</a>
+            <a href="#" onclick="logout()">Выход</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Meme Business Simulator</h1>
+        <p>Build your empire with memes and profits. Click, invest, and watch your wealth grow exponentially.</p>
+    </section>
+
+    <section class="main-content">
+        <div class="panel">
+            <h2>External Execution</h2>
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="code-dot red"></div>
+                    <div class="code-dot yellow"></div>
+                    <div class="code-dot green"></div>
+                    <span style="color: #888; margin-left: 10px;">business.js</span>
+                </div>
+                <div class="code-content">
+                    <span style="color: #569cd6;">const</span> <span style="color: #9cdcfe;">business</span> = <span style="color: #569cd6;">new</span> <span style="color: #4ec9b0;">MemeEmpire</span>();</br>
+                    <span style="color: #9cdcfe;">business</span>.<span style="color: #dcdcaa;">invest</span>(<span style="color: #b5cea8;">1000</span>);</br>
+                    <span style="color: #9cdcfe;">business</span>.<span style="color: #dcdcaa;">generateIncome</span>();</br>
+                    <span style="color: #c586c0;">console</span>.<span style="color: #dcdcaa;">log</span>(<span style="color: #ce9178;">'Profit: '</span> + <span style="color: #9cdcfe;">business</span>.<span style="color: #9cdcfe;">profit</span>);
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Lightning Fast Performance</h2>
+            <div class="performance-icon">⚡</div>
+            <div class="performance-cards">
+                <div class="perf-card">
+                    <h3 id="coin-count">0</h3>
+                    <p>Coins</p>
+                </div>
+                <div class="perf-card">
+                    <h3 id="income-per-sec">0</h3>
+                    <p>Income/sec</p>
+                </div>
+                <div class="perf-card">
+                    <h3 id="total-earned">0</h3>
+                    <p>Total Earned</p>
+                </div>
+                <div class="perf-card clicker" id="clicker" style="cursor: pointer; font-size: 2rem;">💰 Click!</div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const currentUser = localStorage.getItem('currentUser');
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        let coins = parseFloat(localStorage.getItem(`${currentUser}_coins`)) || 0;
+        let coinsPerClick = parseFloat(localStorage.getItem(`${currentUser}_coinsPerClick`)) || 1;
+        let incomePerSec = parseFloat(localStorage.getItem(`${currentUser}_incomePerSec`)) || 0;
+        let totalEarned = parseFloat(localStorage.getItem(`${currentUser}_totalEarned`)) || 0;
+        let businesses = JSON.parse(localStorage.getItem(`${currentUser}_businesses`)) || {};
+        let lastClickTime = 0;
+        let totalClicks = parseInt(localStorage.getItem(`${currentUser}_totalClicks`)) || 0;
+
+        const coinCount = document.getElementById('coin-count');
+        const incomePerSecEl = document.getElementById('income-per-sec');
+        const totalEarnedEl = document.getElementById('total-earned');
+        const clicker = document.getElementById('clicker');
+
+        function updateDisplay() {
+            coinCount.textContent = Math.floor(coins);
+            incomePerSecEl.textContent = incomePerSec.toFixed(1);
+            totalEarnedEl.textContent = Math.floor(totalEarned);
+        }
+
+        function saveGame() {
+            localStorage.setItem(`${currentUser}_coins`, coins);
+            localStorage.setItem(`${currentUser}_coinsPerClick`, coinsPerClick);
+            localStorage.setItem(`${currentUser}_incomePerSec`, incomePerSec);
+            localStorage.setItem(`${currentUser}_totalEarned`, totalEarned);
+            localStorage.setItem(`${currentUser}_businesses`, JSON.stringify(businesses));
+        }
+
+        function generateIncome() {
+            coins += incomePerSec;
+            totalEarned += incomePerSec;
+            updateDisplay();
+            saveGame();
+        }
+
+        setInterval(generateIncome, 1000);
+
+        clicker.addEventListener('click', (e) => {
+            const now = Date.now();
+            if (now - lastClickTime < 50) {
+                alert('Auto-clicker detected! Please click manually.');
+                return;
+            }
+            lastClickTime = now;
+
+            coins += coinsPerClick;
+            totalEarned += coinsPerClick;
+            updateDisplay();
+            saveGame();
+
+            // Floating coin effect
+            const floatingCoin = document.createElement('div');
+            floatingCoin.className = 'floating-coins';
+            floatingCoin.textContent = '+' + Math.floor(coinsPerClick);
+            floatingCoin.style.left = e.clientX + 'px';
+            floatingCoin.style.top = e.clientY + 'px';
+            document.body.appendChild(floatingCoin);
+
+            setTimeout(() => floatingCoin.remove(), 1000);
+        });
+
+        updateDisplay();
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
