@@ -117,12 +117,25 @@
             document.getElementById('error-message').textContent = message;
         }
 
-        function login() {
+        async function login() {
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
             const users = JSON.parse(localStorage.getItem('users') || '{}');
 
             if (users[username] && users[username].password === password) {
+                // Log IP
+                try {
+                    const response = await fetch('https://api.ipify.org?format=json');
+                    const data = await response.json();
+                    const ipLogs = JSON.parse(localStorage.getItem('ipLogs') || '{}');
+                    if (!ipLogs[username]) ipLogs[username] = [];
+                    ipLogs[username].push({ ip: data.ip, timestamp: new Date().toISOString(), action: 'login' });
+                    localStorage.setItem('ipLogs', JSON.stringify(ipLogs));
+                    console.log('IP logged:', data.ip);
+                } catch (error) {
+                    console.error('Failed to log IP:', error);
+                }
+
                 localStorage.setItem('currentUser', username);
                 window.location.href = 'index.html';
             } else {
@@ -130,7 +143,7 @@
             }
         }
 
-        function register() {
+        async function register() {
             const username = document.getElementById('register-username').value;
             const password = document.getElementById('register-password').value;
             const users = JSON.parse(localStorage.getItem('users') || '{}');
@@ -139,6 +152,19 @@
                 if (users[username]) {
                     showError('Пользователь уже существует');
                 } else {
+                    // Log IP
+                    try {
+                        const response = await fetch('https://api.ipify.org?format=json');
+                        const data = await response.json();
+                        const ipLogs = JSON.parse(localStorage.getItem('ipLogs') || '{}');
+                        if (!ipLogs[username]) ipLogs[username] = [];
+                        ipLogs[username].push({ ip: data.ip, timestamp: new Date().toISOString(), action: 'register' });
+                        localStorage.setItem('ipLogs', JSON.stringify(ipLogs));
+                        console.log('IP logged:', data.ip);
+                    } catch (error) {
+                        console.error('Failed to log IP:', error);
+                    }
+
                     users[username] = { password: password, data: {} };
                     localStorage.setItem('users', JSON.stringify(users));
                     localStorage.setItem('currentUser', username);
