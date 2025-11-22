@@ -33,8 +33,8 @@
         }
         .navbar .nav-links {
             display: flex;
-            justify-content: center;
-            gap: 30px;
+            justify-content: flex-start;
+            gap: 15px;
         }
         .navbar a {
             color: #ffffff;
@@ -44,10 +44,16 @@
             letter-spacing: 1px;
             transition: all 0.3s ease;
             text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         .navbar a:hover {
             color: #00ffff;
             text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.5);
         }
         .hero {
             text-align: center;
