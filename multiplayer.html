@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer - Meme Business Simulator</title>
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #000000 0%, #0A0A0A 100%);
+            color: #ffffff;
+            padding: 20px;
+            margin: 0;
+            user-select: none;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar .nav-links {
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+        }
+        .navbar a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .navbar a:hover {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+        .leaderboard {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            padding-top: 120px;
+        }
+        .leaderboard h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        .entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .entry:hover {
+            background: rgba(0, 255, 255, 0.05);
+            padding-left: 10px;
+        }
+        .entry:last-child {
+            border-bottom: none;
+        }
+        .submit-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 12px 24px;
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .submit-btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-links">
+            <a href="index.html">Главная</a>
+            <a href="shop.html">Магазин</a>
+            <a href="achievements.html">Достижения</a>
+            <a href="stats.html">Статистика</a>
+            <a href="multiplayer.html">Мультиплеер</a>
+            <a href="#" onclick="logout()">Выход</a>
+        </div>
+    </nav>
+    <div class="leaderboard">
+        <h1>Глобальный Лидерборд</h1>
+        <div id="leaderboard-container">
+            <!-- Leaderboard entries will be populated by JS -->
+        </div>
+        <button class="submit-btn" onclick="submitStats()">Отправить Свои Статистики</button>
+    </div>
+
+    <script>
+        const currentUser = localStorage.getItem('currentUser');
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch('http://localhost:3000/leaderboard');
+                const leaderboard = await response.json();
+                leaderboard.sort((a, b) => b.totalEarned - a.totalEarned);
+                const container = document.getElementById('leaderboard-container');
+                container.innerHTML = '';
+                leaderboard.slice(0, 10).forEach((entry, index) => {
+                    const entryEl = document.createElement('div');
+                    entryEl.className = 'entry';
+                    entryEl.innerHTML = `
+                        <span>${index + 1}. ${entry.username}</span>
+                        <span>${Math.floor(entry.totalEarned)} монет</span>
+                    `;
+                    container.appendChild(entryEl);
+                });
+            } catch (error) {
+                console.error('Failed to load leaderboard:', error);
+                document.getElementById('leaderboard-container').innerHTML = '<p>Не удалось загрузить лидерборд. Убедитесь, что сервер запущен.</p>';
+            }
+        }
+
+        async function submitStats() {
+            const totalEarned = parseFloat(localStorage.getItem(`${currentUser}_totalEarned`)) || 0;
+            const userEntry = { username: currentUser, totalEarned: totalEarned };
+
+            try {
+                // Check if user already exists
+                const response = await fetch('http://localhost:3000/leaderboard');
+                const leaderboard = await response.json();
+                const existingIndex = leaderboard.findIndex(entry => entry.username === currentUser);
+
+                if (existingIndex !== -1) {
+                    // Update existing
+                    await fetch(`http://localhost:3000/leaderboard/${leaderboard[existingIndex].id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(userEntry)
+                    });
+                } else {
+                    // Add new
+                    await fetch('http://localhost:3000/leaderboard', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(userEntry)
+                    });
+                }
+                loadLeaderboard();
+                alert('Статистики отправлены!');
+            } catch (error) {
+                console.error('Failed to submit stats:', error);
+                alert('Не удалось отправить статистики. Убедитесь, что сервер запущен.');
+            }
+        }
+
+        loadLeaderboard();
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
